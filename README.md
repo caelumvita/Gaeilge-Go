@@ -1,2 +1,0 @@
-# Gaeilge-Go
-Gaeilge Go
