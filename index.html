@@ -1,0 +1,158 @@
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gaeilge Go - Вчи ірландську безкоштовно</title>
+  <meta name="description" content="Безкоштовний тренажер ірландської мови з уроками, тестами, флеш-картками та складанням речень." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page-bg"></div>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-card">
+        <div class="flag-line" aria-hidden="true">
+          <span class="orange"></span><span class="white"></span><span class="green"></span>
+        </div>
+        <div class="brand-mark">☘</div>
+        <h1>Gaeilge Go</h1>
+        <p>Безкоштовний міні-Duolingo для ірландської мови</p>
+      </div>
+
+      <nav class="tab-list" aria-label="Навігація">
+        <button class="tab-button active" data-tab="learn">📘 Вчити слова</button>
+        <button class="tab-button" data-tab="quiz">🎯 Тест</button>
+        <button class="tab-button" data-tab="builder">🧩 Скласти речення</button>
+        <button class="tab-button" data-tab="dictionary">📚 Словник</button>
+      </nav>
+
+      <section class="stats-card">
+        <h2>Твій прогрес</h2>
+        <div class="stat-grid">
+          <div class="stat-item">
+            <span class="stat-value" id="learnedCount">0</span>
+            <span class="stat-label">Слів відкрито</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="quizBest">0</span>
+            <span class="stat-label">Найкращий тест</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="builderBest">0</span>
+            <span class="stat-label">Речень зібрано</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="totalPoints">0</span>
+            <span class="stat-label">Усього балів</span>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <main class="content-area">
+      <header class="hero-card">
+        <div>
+          <span class="hero-kicker">Gaeilge • Irish • Ірландська</span>
+          <h2>Вчи слова, фрази та граматику у простому стилі</h2>
+          <p>
+            Уроки побудовані на твоєму словнику плюс додані базові нові слова для щоденного вжитку.
+            Можна тренувати переклад, переглядати картки та складати речення з плиток.
+          </p>
+        </div>
+        <div class="hero-badges">
+          <span>Orange</span>
+          <span>White</span>
+          <span>Green</span>
+        </div>
+      </header>
+
+      <section class="panel active" id="learn-panel">
+        <div class="section-head">
+          <div>
+            <h3>Вчити слова</h3>
+            <p>Натискай на картки, щоб перевертати їх і бачити переклад та підказку з вимовою.</p>
+          </div>
+          <div class="filters" id="categoryFilters"></div>
+        </div>
+        <div class="cards-grid" id="learnGrid"></div>
+      </section>
+
+      <section class="panel" id="quiz-panel">
+        <div class="section-head compact">
+          <div>
+            <h3>Тест на переклад</h3>
+            <p>12 випадкових запитань з варіантами. Результат зберігається у браузері.</p>
+          </div>
+          <button class="primary-btn" id="startQuizBtn">Почати тест</button>
+        </div>
+        <div class="quiz-card hidden" id="quizCard">
+          <div class="quiz-topline">
+            <span id="quizProgress">Питання 1 / 12</span>
+            <span id="quizScore">0 балів</span>
+          </div>
+          <h4 id="quizPrompt">Натисни “Почати тест”.</h4>
+          <div class="options-grid" id="quizOptions"></div>
+          <div class="feedback-row">
+            <p id="quizFeedback">Вибери правильний переклад.</p>
+            <button class="secondary-btn" id="nextQuizBtn" disabled>Далі</button>
+          </div>
+        </div>
+        <div class="empty-state" id="quizEmptyState">
+          <div class="empty-icon">☘</div>
+          <h4>Готовий перевірити себе?</h4>
+          <p>Тут буде переклад слів, фраз і кількох граматичних конструкцій.</p>
+        </div>
+      </section>
+
+      <section class="panel" id="builder-panel">
+        <div class="section-head compact">
+          <div>
+            <h3>Скласти речення</h3>
+            <p>Натискай по словах у правильному порядку, як у Duolingo.</p>
+          </div>
+          <button class="primary-btn" id="startBuilderBtn">Почати</button>
+        </div>
+        <div class="builder-card hidden" id="builderCard">
+          <div class="quiz-topline">
+            <span id="builderProgress">Речення 1 / 10</span>
+            <span id="builderScore">0 балів</span>
+          </div>
+          <h4 id="builderPrompt">Збери речення</h4>
+          <p class="builder-translation" id="builderHint"></p>
+          <div class="answer-line" id="builderAnswer"></div>
+          <div class="token-bank" id="builderTokens"></div>
+          <div class="builder-actions">
+            <button class="secondary-btn" id="clearBuilderBtn">Очистити</button>
+            <button class="primary-btn" id="checkBuilderBtn">Перевірити</button>
+            <button class="secondary-btn" id="nextBuilderBtn" disabled>Далі</button>
+          </div>
+          <p class="builder-feedback" id="builderFeedback">Підказка: зосередься на порядку слів.</p>
+        </div>
+        <div class="empty-state" id="builderEmptyState">
+          <div class="empty-icon">🧩</div>
+          <h4>Тут тренуються готові фрази</h4>
+          <p>Наприклад: “Tá mé go maith.” або “Is féidir liom dul.”</p>
+        </div>
+      </section>
+
+      <section class="panel" id="dictionary-panel">
+        <div class="section-head compact">
+          <div>
+            <h3>Словник</h3>
+            <p>Пошук по ірландському слову, українському перекладу або вимові.</p>
+          </div>
+          <input id="dictionarySearch" class="search-input" type="search" placeholder="Пошук слова..." />
+        </div>
+        <div class="dictionary-list" id="dictionaryList"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
