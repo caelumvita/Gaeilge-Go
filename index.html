@@ -1,67 +1,549 @@
-
 <!DOCTYPE html>
 <html lang="uk">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gaeilge Go - Вчи ірландську безкоштовно</title>
-  <meta name="description" content="Безкоштовний тренажер ірландської мови з уроками, тестами, флеш-картками та складанням речень." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+  <title>Gaeilge Go - Single File Edition</title>
+  <meta name="description" content="Безкоштовний односторінковий тренажер ірландської мови з картками, тестами, реченнями, друком відповіді та словником." />
+  <style>
+    :root {
+      --orange: #f68b1f;
+      --orange-dark: #d87110;
+      --green: #169b62;
+      --green-dark: #0f7749;
+      --paper: #fffdf8;
+      --ink: #18222c;
+      --soft-ink: #60707f;
+      --line: rgba(24, 34, 44, 0.1);
+      --card: rgba(255,255,255,0.9);
+      --shadow: 0 22px 55px rgba(24, 34, 44, 0.12);
+      --r-xl: 28px;
+      --r-lg: 22px;
+      --r-md: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(140deg, #fff4e7 0%, #ffffff 38%, #eefbf3 100%);
+      min-height: 100vh;
+    }
+
+    .page-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at top left, rgba(246, 139, 31, 0.18), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(22, 155, 98, 0.18), transparent 32%);
+    }
+
+    .layout {
+      position: relative;
+      z-index: 1;
+      width: min(1450px, calc(100% - 28px));
+      margin: 16px auto 24px;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+    }
+
+    .sidebar, .content { min-width: 0; }
+    .brand-card, .stats-card, .hero-card, .panel {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.56);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .brand-card {
+      border-radius: var(--r-xl);
+      padding: 22px;
+    }
+
+    .flag-line {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .flag-line span:nth-child(1){background:var(--orange)}
+    .flag-line span:nth-child(2){background:#ffffff}
+    .flag-line span:nth-child(3){background:var(--green)}
+
+    .brand-mark {
+      width: 62px;
+      height: 62px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--orange), var(--green));
+      color: white;
+      font-size: 30px;
+      margin-bottom: 14px;
+    }
+
+    .brand-card h1 {
+      margin: 0 0 8px;
+      font-size: 31px;
+      line-height: 1;
+    }
+
+    .brand-card p {
+      margin: 0;
+      color: var(--soft-ink);
+      line-height: 1.55;
+    }
+
+    .tab-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .tab-button {
+      appearance: none;
+      width: 100%;
+      border: 0;
+      border-radius: 16px;
+      padding: 15px 18px;
+      text-align: left;
+      font-weight: 800;
+      font-size: 15px;
+      background: rgba(255,255,255,0.8);
+      color: var(--ink);
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease;
+      box-shadow: 0 10px 24px rgba(24, 34, 44, 0.06);
+    }
+
+    .tab-button:hover { transform: translateY(-1px); }
+    .tab-button.active {
+      background: linear-gradient(135deg, var(--orange), var(--green));
+      color: #fff;
+    }
+
+    .stats-card {
+      border-radius: var(--r-xl);
+      padding: 20px;
+    }
+
+    .stats-card h2 {
+      margin: 0 0 14px;
+      font-size: 18px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .stat {
+      background: rgba(255,255,255,0.88);
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      padding: 14px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+
+    .stat span {
+      font-size: 13px;
+      color: var(--soft-ink);
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .hero-card {
+      border-radius: var(--r-xl);
+      padding: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+    }
+
+    .hero-kicker {
+      display: inline-block;
+      margin-bottom: 10px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      color: var(--green-dark);
+      text-transform: uppercase;
+    }
+
+    .hero-card h2 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 4vw, 42px);
+      line-height: 1.06;
+      max-width: 820px;
+    }
+
+    .hero-card p {
+      margin: 0;
+      max-width: 820px;
+      line-height: 1.7;
+      color: var(--soft-ink);
+    }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .hero-badges span {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.9);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .hero-badges span:nth-child(1){color:var(--orange-dark)}
+    .hero-badges span:nth-child(2){color:#808080}
+    .hero-badges span:nth-child(3){color:var(--green-dark)}
+
+    .panel {
+      display: none;
+      border-radius: var(--r-xl);
+      padding: 24px;
+    }
+    .panel.active { display: block; }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .section-head.compact { align-items: center; }
+    .section-head h3 {
+      margin: 0 0 6px;
+      font-size: 28px;
+    }
+    .section-head p {
+      margin: 0;
+      color: var(--soft-ink);
+      line-height: 1.6;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .filter-chip {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .filter-chip.active {
+      background: linear-gradient(135deg, rgba(246,139,31,0.14), rgba(22,155,98,0.14));
+      border-color: rgba(22,155,98,0.28);
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+      gap: 16px;
+    }
+    .word-card {
+      position: relative;
+      min-height: 188px;
+      padding: 20px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(255,255,255,0.84));
+      border: 1px solid var(--line);
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease;
+      overflow: hidden;
+    }
+    .word-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 35px rgba(24,34,44,0.09);
+    }
+    .word-card::after {
+      content: '';
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 6px;
+      background: linear-gradient(90deg, var(--orange), var(--green));
+    }
+    .word-tag {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(246,139,31,0.13);
+      color: var(--orange-dark);
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+    .word-irish {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+    .word-meta {
+      color: var(--soft-ink);
+      line-height: 1.55;
+    }
+    .word-hidden { display: none; }
+    .word-card.revealed .word-front { display:none; }
+    .word-card.revealed .word-hidden { display:block; }
+
+    .primary-btn, .secondary-btn {
+      appearance: none;
+      border: 0;
+      border-radius: 16px;
+      padding: 12px 18px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .15s ease, opacity .15s ease;
+    }
+    .primary-btn:hover, .secondary-btn:hover { transform: translateY(-1px); }
+    .primary-btn {
+      background: linear-gradient(135deg, var(--orange), var(--green));
+      color: #fff;
+    }
+    .secondary-btn {
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+    .primary-btn:disabled, .secondary-btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .quiz-card, .builder-card, .typing-card {
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.9);
+      padding: 24px;
+    }
+    .hidden { display: none !important; }
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--soft-ink);
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+    .quiz-card h4, .builder-card h4, .typing-card h4 {
+      margin: 0 0 16px;
+      font-size: 30px;
+    }
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .option-btn {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: #fff;
+      text-align: left;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .option-btn.correct {
+      background: rgba(22,155,98,0.12);
+      border-color: rgba(22,155,98,0.55);
+    }
+    .option-btn.wrong {
+      background: rgba(246,139,31,0.12);
+      border-color: rgba(216,113,16,0.55);
+    }
+    .feedback-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-top: 18px;
+    }
+    .feedback-row p, .builder-feedback, .typing-feedback {
+      margin: 0;
+      color: var(--soft-ink);
+      line-height: 1.55;
+    }
+
+    .empty-state {
+      border-radius: 24px;
+      padding: 42px 24px;
+      text-align: center;
+      border: 1px dashed rgba(24,34,44,0.14);
+      background: rgba(255,255,255,0.5);
+    }
+    .empty-state h4 { margin: 0 0 8px; font-size: 26px; }
+    .empty-state p { margin: 0; color: var(--soft-ink); }
+    .empty-icon { font-size: 42px; margin-bottom: 10px; }
+
+    .builder-translation, .typing-hint {
+      margin: 0 0 16px;
+      color: var(--green-dark);
+      font-weight: 700;
+    }
+    .answer-line {
+      min-height: 74px;
+      border: 2px dashed rgba(24,34,44,0.12);
+      border-radius: 18px;
+      padding: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: rgba(255,255,255,0.84);
+      margin-bottom: 16px;
+    }
+    .token-bank {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .token {
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .token.used { opacity: .45; cursor: not-allowed; }
+    .builder-actions, .typing-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .typing-input {
+      width: 100%;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      padding: 15px 16px;
+      font-size: 17px;
+      background: #fff;
+      outline: none;
+    }
+
+    .search-input {
+      min-width: 280px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      padding: 12px 14px;
+      background: #fff;
+      font-size: 15px;
+    }
+
+    .dictionary-list {
+      display: grid;
+      gap: 12px;
+    }
+    .dictionary-row {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr 1fr .9fr;
+      gap: 14px;
+      align-items: start;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px 18px;
+    }
+    .dictionary-row strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 18px;
+    }
+    .dictionary-row span {
+      color: var(--soft-ink);
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1080px) {
+      .layout { grid-template-columns: 1fr; }
+      .hero-card, .section-head, .section-head.compact { flex-direction: column; }
+      .filters { justify-content: flex-start; }
+    }
+
+    @media (max-width: 760px) {
+      .layout { width: min(100% - 16px, 1450px); margin-top: 8px; }
+      .brand-card, .stats-card, .hero-card, .panel { border-radius: 22px; }
+      .panel { padding: 18px; }
+      .hero-card h2, .section-head h3, .quiz-card h4, .builder-card h4, .typing-card h4 { font-size: 24px; }
+      .feedback-row { flex-direction: column; align-items: stretch; }
+      .dictionary-row { grid-template-columns: 1fr; }
+      .search-input { min-width: 100%; width: 100%; }
+    }
+  </style>
 </head>
 <body>
   <div class="page-bg"></div>
-  <div class="app-shell">
+  <div class="layout">
     <aside class="sidebar">
-      <div class="brand-card">
-        <div class="flag-line" aria-hidden="true">
-          <span class="orange"></span><span class="white"></span><span class="green"></span>
-        </div>
+      <section class="brand-card">
+        <div class="flag-line" aria-hidden="true"><span></span><span></span><span></span></div>
         <div class="brand-mark">☘</div>
         <h1>Gaeilge Go</h1>
-        <p>Безкоштовний міні-Duolingo для ірландської мови</p>
-      </div>
+        <p>One-file edition — один великий безкоштовний тренажер ірландської мови в одному <strong>index.html</strong>.</p>
+      </section>
 
       <nav class="tab-list" aria-label="Навігація">
         <button class="tab-button active" data-tab="learn">📘 Вчити слова</button>
         <button class="tab-button" data-tab="quiz">🎯 Тест</button>
         <button class="tab-button" data-tab="builder">🧩 Скласти речення</button>
+        <button class="tab-button" data-tab="typing">✍️ Написати відповідь</button>
         <button class="tab-button" data-tab="dictionary">📚 Словник</button>
       </nav>
 
       <section class="stats-card">
         <h2>Твій прогрес</h2>
-        <div class="stat-grid">
-          <div class="stat-item">
-            <span class="stat-value" id="learnedCount">0</span>
-            <span class="stat-label">Слів відкрито</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-value" id="quizBest">0</span>
-            <span class="stat-label">Найкращий тест</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-value" id="builderBest">0</span>
-            <span class="stat-label">Речень зібрано</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-value" id="totalPoints">0</span>
-            <span class="stat-label">Усього балів</span>
-          </div>
+        <div class="stats-grid">
+          <div class="stat"><strong id="stat-learned">0</strong><span>Слів відкрито</span></div>
+          <div class="stat"><strong id="stat-quiz">0</strong><span>Найкращий тест</span></div>
+          <div class="stat"><strong id="stat-builder">0</strong><span>Речень зібрано</span></div>
+          <div class="stat"><strong id="stat-points">0</strong><span>Усього балів</span></div>
         </div>
       </section>
     </aside>
 
-    <main class="content-area">
+    <main class="content">
       <header class="hero-card">
         <div>
           <span class="hero-kicker">Gaeilge • Irish • Ірландська</span>
-          <h2>Вчи слова, фрази та граматику у простому стилі</h2>
+          <h2>Більше слів, більше граматики, більше буденних речень — і все в одному index.html</h2>
           <p>
-            Уроки побудовані на твоєму словнику плюс додані базові нові слова для щоденного вжитку.
-            Можна тренувати переклад, переглядати картки та складати речення з плиток.
+            Тут збережено той самий помаранчево-біло-зелений стиль, але словник став значно більший:
+            питання, короткі відповіді, “я хочу / ти хочеш”, побутові слова, корисні фрази та речення для щоденної практики.
           </p>
         </div>
         <div class="hero-badges">
@@ -75,7 +557,7 @@
         <div class="section-head">
           <div>
             <h3>Вчити слова</h3>
-            <p>Натискай на картки, щоб перевертати їх і бачити переклад та підказку з вимовою.</p>
+            <p>Натискай на картки, щоб бачити переклад і приблизну вимову.</p>
           </div>
           <div class="filters" id="categoryFilters"></div>
         </div>
@@ -85,27 +567,27 @@
       <section class="panel" id="quiz-panel">
         <div class="section-head compact">
           <div>
-            <h3>Тест на переклад</h3>
-            <p>12 випадкових запитань з варіантами. Результат зберігається у браузері.</p>
+            <h3>Тест</h3>
+            <p>Мікс напрямків: Irish → Українська та Українська → Irish.</p>
           </div>
           <button class="primary-btn" id="startQuizBtn">Почати тест</button>
         </div>
         <div class="quiz-card hidden" id="quizCard">
-          <div class="quiz-topline">
-            <span id="quizProgress">Питання 1 / 12</span>
+          <div class="topline">
+            <span id="quizProgress">Питання 1 / 15</span>
             <span id="quizScore">0 балів</span>
           </div>
           <h4 id="quizPrompt">Натисни “Почати тест”.</h4>
           <div class="options-grid" id="quizOptions"></div>
           <div class="feedback-row">
-            <p id="quizFeedback">Вибери правильний переклад.</p>
+            <p id="quizFeedback">Вибери правильну відповідь.</p>
             <button class="secondary-btn" id="nextQuizBtn" disabled>Далі</button>
           </div>
         </div>
         <div class="empty-state" id="quizEmptyState">
           <div class="empty-icon">☘</div>
-          <h4>Готовий перевірити себе?</h4>
-          <p>Тут буде переклад слів, фраз і кількох граматичних конструкцій.</p>
+          <h4>Тут буде швидка перевірка знань</h4>
+          <p>Питання беруться з великого словника та фраз.</p>
         </div>
       </section>
 
@@ -113,16 +595,16 @@
         <div class="section-head compact">
           <div>
             <h3>Скласти речення</h3>
-            <p>Натискай по словах у правильному порядку, як у Duolingo.</p>
+            <p>Слова перемішані — збери речення у правильному порядку.</p>
           </div>
           <button class="primary-btn" id="startBuilderBtn">Почати</button>
         </div>
         <div class="builder-card hidden" id="builderCard">
-          <div class="quiz-topline">
-            <span id="builderProgress">Речення 1 / 10</span>
+          <div class="topline">
+            <span id="builderProgress">Речення 1 / 12</span>
             <span id="builderScore">0 балів</span>
           </div>
-          <h4 id="builderPrompt">Збери речення</h4>
+          <h4 id="builderPrompt">Збери правильне речення</h4>
           <p class="builder-translation" id="builderHint"></p>
           <div class="answer-line" id="builderAnswer"></div>
           <div class="token-bank" id="builderTokens"></div>
@@ -131,12 +613,41 @@
             <button class="primary-btn" id="checkBuilderBtn">Перевірити</button>
             <button class="secondary-btn" id="nextBuilderBtn" disabled>Далі</button>
           </div>
-          <p class="builder-feedback" id="builderFeedback">Підказка: зосередься на порядку слів.</p>
+          <p class="builder-feedback" id="builderFeedback">Підказка: натискай по плитках по черзі.</p>
         </div>
         <div class="empty-state" id="builderEmptyState">
           <div class="empty-icon">🧩</div>
-          <h4>Тут тренуються готові фрази</h4>
-          <p>Наприклад: “Tá mé go maith.” або “Is féidir liom dul.”</p>
+          <h4>Тут будуть побутові речення</h4>
+          <p>Наприклад: “Ba mhaith liom tae.” або “Cá bhfuil an leabhar?”</p>
+        </div>
+      </section>
+
+      <section class="panel" id="typing-panel">
+        <div class="section-head compact">
+          <div>
+            <h3>Написати відповідь</h3>
+            <p>Напиши ірландською. Для зручності перевірка не чіпляється до регістру та більшості акцентів.</p>
+          </div>
+          <button class="primary-btn" id="startTypingBtn">Почати</button>
+        </div>
+        <div class="typing-card hidden" id="typingCard">
+          <div class="topline">
+            <span id="typingProgress">Завдання 1 / 10</span>
+            <span id="typingScore">0 балів</span>
+          </div>
+          <h4 id="typingPrompt">Переклади на ірландську</h4>
+          <p class="typing-hint" id="typingHint"></p>
+          <input class="typing-input" id="typingInput" type="text" placeholder="Напиши відповідь тут..." autocomplete="off" />
+          <div class="typing-actions">
+            <button class="primary-btn" id="checkTypingBtn">Перевірити</button>
+            <button class="secondary-btn" id="nextTypingBtn" disabled>Далі</button>
+          </div>
+          <p class="typing-feedback" id="typingFeedback">Починай без поспіху.</p>
+        </div>
+        <div class="empty-state" id="typingEmptyState">
+          <div class="empty-icon">✍️</div>
+          <h4>Тут уже треба друкувати самому</h4>
+          <p>Короткі слова і фрази: “так”, “де?”, “я хочу чай”, “дякую” та інші.</p>
         </div>
       </section>
 
@@ -144,15 +655,660 @@
         <div class="section-head compact">
           <div>
             <h3>Словник</h3>
-            <p>Пошук по ірландському слову, українському перекладу або вимові.</p>
+            <p>Пошук по ірландському слову, перекладу, вимові або темі.</p>
           </div>
-          <input id="dictionarySearch" class="search-input" type="search" placeholder="Пошук слова..." />
+          <input class="search-input" id="dictionarySearch" type="search" placeholder="Пошук слова..." />
         </div>
         <div class="dictionary-list" id="dictionaryList"></div>
       </section>
     </main>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    const vocabulary = [
+      { irish: 'Dia dhuit', uk: 'привіт', pron: 'діа ґвич', category: 'Привітання' },
+      { irish: 'Dia is Muire dhuit', uk: 'відповідь на привітання', pron: 'діа іс мурє ґвич', category: 'Привітання' },
+      { irish: 'Slán', uk: 'бувай', pron: 'слоон', category: 'Привітання' },
+      { irish: 'Slán leat', uk: 'бувай (до однієї людини)', pron: 'слоон лят', category: 'Привітання' },
+      { irish: 'Go raibh maith agat', uk: 'дякую', pron: 'ґо рев ма агат', category: 'Привітання' },
+      { irish: 'Tá fáilte romhat', uk: 'будь ласка', pron: 'та фольче роват', category: 'Привітання' },
+      { irish: 'Fáilte!', uk: 'ласкаво прошу / будь ласка', pron: 'фольче', category: 'Привітання' },
+      { irish: 'Sláinte!', uk: 'будьмо / за здоров’я', pron: 'слонче', category: 'Привітання' },
+      { irish: 'Oíche mhaith', uk: 'добраніч', pron: 'ойхе вах', category: 'Привітання' },
+      { irish: 'Maidin mhaith', uk: 'доброго ранку', pron: 'маджинь вах', category: 'Привітання' },
+
+      { irish: 'cad?', uk: 'що?', pron: 'кад', category: 'Питання' },
+      { irish: 'céard?', uk: 'що?', pron: 'кярд', category: 'Питання' },
+      { irish: 'cé?', uk: 'хто?', pron: 'кє', category: 'Питання' },
+      { irish: 'cá?', uk: 'де?', pron: 'ка', category: 'Питання' },
+      { irish: 'cathain?', uk: 'коли?', pron: 'кахінь', category: 'Питання' },
+      { irish: 'cén uair?', uk: 'коли? / о котрій?', pron: 'кєн уар', category: 'Питання' },
+      { irish: 'conas?', uk: 'як?', pron: 'конас', category: 'Питання' },
+      { irish: 'cén chaoi?', uk: 'як? / яким чином?', pron: 'кєн хі', category: 'Питання' },
+      { irish: 'cén fáth?', uk: 'чому?', pron: 'кєн фаа', category: 'Питання' },
+      { irish: 'cad chuige?', uk: 'для чого? / чому?', pron: 'кад хуґе', category: 'Питання' },
+      { irish: 'Cad é seo?', uk: 'Що це?', pron: 'кад е шо', category: 'Питання' },
+      { irish: 'Cé hé sin?', uk: 'Хто це?', pron: 'кє хе шин', category: 'Питання' },
+      { irish: 'Cá bhfuil an leabhar?', uk: 'Де книга?', pron: 'ка віль ан ляур', category: 'Питання' },
+      { irish: 'Cathain atá an rang?', uk: 'Коли урок / заняття?', pron: 'кахінь ата ан ранг', category: 'Питання' },
+      { irish: 'Conas tá tú?', uk: 'Як ти?', pron: 'конас та ту', category: 'Питання' },
+      { irish: 'Cén chaoi a bhfuil tú?', uk: 'Як ти?', pron: 'кєн хі а віль ту', category: 'Питання' },
+
+      { irish: 'Tá', uk: 'так (відповідь у питаннях з tá)', pron: 'та', category: 'Так / Ні' },
+      { irish: 'Níl', uk: 'ні (відповідь у питаннях з tá)', pron: 'ніл', category: 'Так / Ні' },
+      { irish: 'Is ea', uk: 'так (відповідь у питаннях з is)', pron: 'іс еа', category: 'Так / Ні' },
+      { irish: 'Ní hea', uk: 'ні (відповідь у питаннях з is)', pron: 'ні хя', category: 'Так / Ні' },
+      { irish: 'sea', uk: 'так', pron: 'ша', category: 'Так / Ні' },
+
+      { irish: 'Tá mé', uk: 'я є', pron: 'та ме', category: 'Граматика' },
+      { irish: 'Tá tú', uk: 'ти є', pron: 'та ту', category: 'Граматика' },
+      { irish: 'Tá sé', uk: 'він є', pron: 'та ше', category: 'Граматика' },
+      { irish: 'Tá sí', uk: 'вона є', pron: 'та ші', category: 'Граматика' },
+      { irish: 'Táimid', uk: 'ми є', pron: 'та-мід', category: 'Граматика' },
+      { irish: 'Tá sibh', uk: 'ви є', pron: 'та шив', category: 'Граматика' },
+      { irish: 'Tá siad', uk: 'вони є', pron: 'та шід', category: 'Граматика' },
+      { irish: 'Is ainm dom', uk: 'мене звати', pron: 'іс анім дум', category: 'Граматика' },
+      { irish: 'Tá mé go maith', uk: 'я добре', pron: 'та ме ґо ма', category: 'Граматика' },
+      { irish: 'Tá mé tuirseach', uk: 'я втомлений / втомлена', pron: 'та ме туршах', category: 'Граматика' },
+      { irish: 'Tá sí sásta', uk: 'вона щаслива', pron: 'та ші сооста', category: 'Граматика' },
+      { irish: 'Tá sé fuar', uk: 'холодно / він холодний', pron: 'та ше фуар', category: 'Граматика' },
+      { irish: 'Tá sé te', uk: 'тепло / він гарячий', pron: 'та ше тє', category: 'Граматика' },
+      { irish: 'Tá ocras orm', uk: 'я голодний / голодна', pron: 'та окрас орм', category: 'Граматика' },
+      { irish: 'Tá tart orm', uk: 'я хочу пити', pron: 'та тарт орм', category: 'Граматика' },
+
+      { irish: 'Is féidir liom', uk: 'я можу', pron: 'іс фєдір ліом', category: 'Можу / Хочу' },
+      { irish: 'Is féidir leat', uk: 'ти можеш', pron: 'іс фєдір лят', category: 'Можу / Хочу' },
+      { irish: 'Is féidir leis', uk: 'він може', pron: 'іс фєдір лєш', category: 'Можу / Хочу' },
+      { irish: 'Is féidir léi', uk: 'вона може', pron: 'іс фєдір лей', category: 'Можу / Хочу' },
+      { irish: 'Is féidir linn', uk: 'ми можемо', pron: 'іс фєдір лінь', category: 'Можу / Хочу' },
+      { irish: 'Is féidir libh', uk: 'ви можете', pron: 'іс фєдір лів', category: 'Можу / Хочу' },
+      { irish: 'Is féidir leo', uk: 'вони можуть', pron: 'іс фєдір льо', category: 'Можу / Хочу' },
+      { irish: 'Ní féidir liom', uk: 'я не можу', pron: 'ні фєдір ліом', category: 'Можу / Хочу' },
+      { irish: 'An féidir leat...?', uk: 'чи можеш ти...?', pron: 'ан фєдір лят', category: 'Можу / Хочу' },
+      { irish: 'Ba mhaith liom', uk: 'я хочу / я б хотів', pron: 'ба вах ліом', category: 'Можу / Хочу' },
+      { irish: 'Ba mhaith leat', uk: 'ти хочеш / ти б хотів', pron: 'ба вах лят', category: 'Можу / Хочу' },
+      { irish: 'Ba mhaith leis', uk: 'він хоче / він би хотів', pron: 'ба вах лєш', category: 'Можу / Хочу' },
+      { irish: 'Ba mhaith léi', uk: 'вона хоче / вона б хотіла', pron: 'ба вах лей', category: 'Можу / Хочу' },
+      { irish: 'Ba mhaith linn', uk: 'ми хочемо', pron: 'ба вах лінь', category: 'Можу / Хочу' },
+      { irish: 'Ba mhaith libh', uk: 'ви хочете', pron: 'ба вах лів', category: 'Можу / Хочу' },
+      { irish: 'Ba mhaith leo', uk: 'вони хочуть', pron: 'ба вах льо', category: 'Можу / Хочу' },
+
+      { irish: 'duine', uk: 'людина', pron: 'динє', category: 'Щоденні слова' },
+      { irish: 'cara', uk: 'друг', pron: 'кара', category: 'Щоденні слова' },
+      { irish: 'teach', uk: 'дім', pron: 'тях', category: 'Щоденні слова' },
+      { irish: 'uisce', uk: 'вода', pron: 'ішке', category: 'Щоденні слова' },
+      { irish: 'arán', uk: 'хліб', pron: 'араан', category: 'Щоденні слова' },
+      { irish: 'ainm', uk: 'ім’я', pron: 'анім', category: 'Щоденні слова' },
+      { irish: 'páiste', uk: 'дитина', pron: 'паште', category: 'Щоденні слова' },
+      { irish: 'bean', uk: 'жінка', pron: 'бян', category: 'Щоденні слова' },
+      { irish: 'fear', uk: 'чоловік', pron: 'фяр', category: 'Щоденні слова' },
+      { irish: 'madra', uk: 'собака', pron: 'мадра', category: 'Щоденні слова' },
+      { irish: 'cat', uk: 'кіт', pron: 'кат', category: 'Щоденні слова' },
+      { irish: 'scoil', uk: 'школа', pron: 'сколь', category: 'Щоденні слова' },
+      { irish: 'leabhar', uk: 'книга', pron: 'ляур', category: 'Щоденні слова' },
+      { irish: 'bia', uk: 'їжа', pron: 'бія', category: 'Щоденні слова' },
+      { irish: 'teaghlach', uk: 'сім’я', pron: 'тяллах', category: 'Щоденні слова' },
+      { irish: 'tae', uk: 'чай', pron: 'те', category: 'Щоденні слова' },
+      { irish: 'caife', uk: 'кава', pron: 'кафє', category: 'Щоденні слова' },
+      { irish: 'bainne', uk: 'молоко', pron: 'банє', category: 'Щоденні слова' },
+      { irish: 'bord', uk: 'стіл', pron: 'борд', category: 'Щоденні слова' },
+      { irish: 'doras', uk: 'двері', pron: 'дорас', category: 'Щоденні слова' },
+      { irish: 'fuinneog', uk: 'вікно', pron: 'фіньог', category: 'Щоденні слова' },
+      { irish: 'carr', uk: 'машина', pron: 'кар', category: 'Щоденні слова' },
+      { irish: 'bóthar', uk: 'дорога', pron: 'бохар', category: 'Щоденні слова' },
+      { irish: 'seomra', uk: 'кімната', pron: 'шомра', category: 'Щоденні слова' },
+      { irish: 'rang', uk: 'урок / клас', pron: 'ранг', category: 'Щоденні слова' },
+      { irish: 'peann', uk: 'ручка', pron: 'пян', category: 'Щоденні слова' },
+      { irish: 'páipéar', uk: 'папір', pron: 'паапєр', category: 'Щоденні слова' },
+      { irish: 'grian', uk: 'сонце', pron: 'ґріан', category: 'Щоденні слова' },
+      { irish: 'gealach', uk: 'місяць', pron: 'ґалах', category: 'Щоденні слова' },
+      { irish: 'réalta', uk: 'зірка', pron: 'рєйлта', category: 'Щоденні слова' },
+      { irish: 'am', uk: 'час', pron: 'ам', category: 'Щоденні слова' },
+      { irish: 'lá', uk: 'день', pron: 'ла', category: 'Щоденні слова' },
+      { irish: 'oíche', uk: 'ніч', pron: 'ойхе', category: 'Щоденні слова' },
+
+      { irish: 'solas', uk: 'світло', pron: 'солас', category: 'Красиві слова' },
+      { irish: 'dorcha', uk: 'темний', pron: 'дорха', category: 'Красиві слова' },
+      { irish: 'grá', uk: 'любов', pron: 'ґраа', category: 'Красиві слова' },
+      { irish: 'síocháin', uk: 'мир, спокій', pron: 'шііхаань', category: 'Красиві слова' },
+      { irish: 'dóchas', uk: 'надія', pron: 'доохас', category: 'Красиві слова' },
+      { irish: 'beatha', uk: 'життя', pron: 'бяха', category: 'Красиві слова' },
+      { irish: 'bás', uk: 'смерть', pron: 'баас', category: 'Красиві слова' },
+      { irish: 'fírinne', uk: 'правда', pron: 'фірінє', category: 'Красиві слова' },
+      { irish: 'croí', uk: 'серце', pron: 'крі', category: 'Красиві слова' },
+      { irish: 'muinín', uk: 'довіра', pron: 'муйнінь', category: 'Красиві слова' },
+      { irish: 'cineáltas', uk: 'доброта', pron: 'кінєалтас', category: 'Красиві слова' },
+      { irish: 'sonas', uk: 'щастя', pron: 'сонас', category: 'Красиві слова' },
+
+      { irish: 'An Cháisc', uk: 'Великдень / Пасха', pron: 'ан хашкь', category: 'Свята і віра' },
+      { irish: 'cáca Cásca', uk: 'паска', pron: 'каака кооска', category: 'Свята і віра' },
+      { irish: 'ubh Cásca', uk: 'великоднє яйце', pron: 'ув кооска', category: 'Свята і віра' },
+      { irish: 'ubh', uk: 'яйце', pron: 'ув', category: 'Свята і віра' },
+      { irish: 'Críostaí', uk: 'християнин', pron: 'кріістіі', category: 'Свята і віра' },
+      { irish: 'an Chríostaíocht', uk: 'християнство', pron: 'ан хріістаїхт', category: 'Свята і віра' },
+      { irish: 'Dia', uk: 'Бог', pron: 'діа', category: 'Свята і віра' },
+      { irish: 'Íosa', uk: 'Ісус', pron: 'іса', category: 'Свята і віра' },
+      { irish: 'eaglais', uk: 'церква', pron: 'агліш', category: 'Свята і віра' },
+      { irish: 'paidir', uk: 'молитва', pron: 'паджір', category: 'Свята і віра' },
+      { irish: 'Aiséirí', uk: 'воскресіння', pron: 'ашееріі', category: 'Свята і віра' },
+      { irish: 'an chros', uk: 'хрест', pron: 'ан хрос', category: 'Свята і віра' },
+      { irish: 'anam', uk: 'душа', pron: 'анам', category: 'Свята і віра' },
+
+      { irish: 'Ba mhaith liom tae.', uk: 'Я хочу чай.', pron: 'ба вах ліом те', category: 'Буденні речення' },
+      { irish: 'Ba mhaith leat arán?', uk: 'Ти хочеш хліб?', pron: 'ба вах лят араан', category: 'Буденні речення' },
+      { irish: 'Tá an tae te.', uk: 'Чай гарячий.', pron: 'та ан те тє', category: 'Буденні речення' },
+      { irish: 'Tá an t-uisce fuar.', uk: 'Вода холодна.', pron: 'та ан тішке фуар', category: 'Буденні речення' },
+      { irish: 'Tá bia agus uisce ann.', uk: 'Там є їжа і вода.', pron: 'та бія агус ішке ан', category: 'Буденні речення' },
+      { irish: 'Tá an doras oscailte.', uk: 'Двері відчинені.', pron: 'та ан дорас оскальте', category: 'Буденні речення' },
+      { irish: 'Tá an carr anseo.', uk: 'Машина тут.', pron: 'та ан кар аншо', category: 'Буденні речення' },
+      { irish: 'Tá an leabhar ar an mbord.', uk: 'Книга на столі.', pron: 'та ан ляур ер ан морд', category: 'Буденні речення' },
+      { irish: 'Tá mé ar scoil.', uk: 'Я в школі.', pron: 'та ме ер сколь', category: 'Буденні речення' },
+      { irish: 'Tá an rang inniu.', uk: 'Урок сьогодні.', pron: 'та ан ранг іню', category: 'Буденні речення' },
+      { irish: 'Is ainm dom Davyd.', uk: 'Мене звати Давид.', pron: 'іс анім дум давид', category: 'Буденні речення' },
+      { irish: 'Tá grá i mo chroí.', uk: 'У моєму серці є любов.', pron: 'та ґра і мо хрі', category: 'Буденні речення' },
+      { irish: 'Tá dóchas agam.', uk: 'Я маю надію.', pron: 'та доохас агам', category: 'Буденні речення' },
+      { irish: 'An féidir leat cabhrú liom?', uk: 'Можеш допомогти мені?', pron: 'ан фєдір лят кавру ліом', category: 'Буденні речення' },
+      { irish: 'Ní féidir liom é a dhéanamh.', uk: 'Я не можу це зробити.', pron: 'ні фєдір ліом е а єнав', category: 'Буденні речення' },
+      { irish: 'Conas tá tú? Tá mé go maith.', uk: 'Як ти? Я добре.', pron: 'конас та ту... та ме ґо ма', category: 'Буденні речення' },
+      { irish: 'Cén chaoi a bhfuil tú? Tá mé tuirseach.', uk: 'Як ти? Я втомлений / втомлена.', pron: 'кєн хі а віль ту... та ме туршах', category: 'Буденні речення' },
+      { irish: 'Cad é seo? Is leabhar é.', uk: 'Що це? Це книга.', pron: 'кад е шо... іс ляур е', category: 'Буденні речення' },
+      { irish: 'Cé hé sin? Is cara é.', uk: 'Хто це? Це друг.', pron: 'кє хе шин... іс кара е', category: 'Буденні речення' },
+      { irish: 'Cá bhfuil an madra?', uk: 'Де собака?', pron: 'ка віль ан мадра', category: 'Буденні речення' },
+      { irish: 'Cathain atá an lá saor?', uk: 'Коли вихідний?', pron: 'кахінь ата ан ла сир', category: 'Буденні речення' }
+    ];
+
+    const sentenceChallenges = [
+      { sentence: 'Tá mé go maith.', hint: 'Я добре.' },
+      { sentence: 'Tá mé tuirseach.', hint: 'Я втомлений / втомлена.' },
+      { sentence: 'Tá ocras orm.', hint: 'Я голодний / голодна.' },
+      { sentence: 'Tá tart orm.', hint: 'Я хочу пити.' },
+      { sentence: 'Ba mhaith liom tae.', hint: 'Я хочу чай.' },
+      { sentence: 'Ba mhaith leat arán?', hint: 'Ти хочеш хліб?' },
+      { sentence: 'Tá an tae te.', hint: 'Чай гарячий.' },
+      { sentence: 'Tá an t-uisce fuar.', hint: 'Вода холодна.' },
+      { sentence: 'Tá an carr anseo.', hint: 'Машина тут.' },
+      { sentence: 'Tá an leabhar ar an mbord.', hint: 'Книга на столі.' },
+      { sentence: 'Tá mé ar scoil.', hint: 'Я в школі.' },
+      { sentence: 'Tá an rang inniu.', hint: 'Урок сьогодні.' },
+      { sentence: 'Cá bhfuil an madra?', hint: 'Де собака?' },
+      { sentence: 'Cad é seo?', hint: 'Що це?' },
+      { sentence: 'Cé hé sin?', hint: 'Хто це?' },
+      { sentence: 'Conas tá tú?', hint: 'Як ти?' },
+      { sentence: 'Cén chaoi a bhfuil tú?', hint: 'Як ти?' },
+      { sentence: 'An féidir leat cabhrú liom?', hint: 'Можеш допомогти мені?' },
+      { sentence: 'Ní féidir liom é a dhéanamh.', hint: 'Я не можу це зробити.' },
+      { sentence: 'Tá bia agus uisce ann.', hint: 'Там є їжа і вода.' },
+      { sentence: 'Tá grá i mo chroí.', hint: 'У моєму серці є любов.' },
+      { sentence: 'Tá dóchas agam.', hint: 'Я маю надію.' },
+      { sentence: 'Is ainm dom Davyd.', hint: 'Мене звати Давид.' },
+      { sentence: 'Tá an doras oscailte.', hint: 'Двері відчинені.' }
+    ];
+
+    const typingChallenges = [
+      { prompt: 'привіт', answers: ['Dia dhuit'], hint: 'Базове привітання.' },
+      { prompt: 'дякую', answers: ['Go raibh maith agat'], hint: 'Дуже корисна фраза.' },
+      { prompt: 'що?', answers: ['cad', 'céard'], hint: 'Підійде один із двох частих варіантів.' },
+      { prompt: 'хто?', answers: ['cé'], hint: 'Коротке слово.' },
+      { prompt: 'де?', answers: ['cá'], hint: 'Питальне слово про місце.' },
+      { prompt: 'коли?', answers: ['cathain', 'cén uair'], hint: 'Один коротший, інший детальніший.' },
+      { prompt: 'як?', answers: ['conas', 'cén chaoi'], hint: 'Обидва варіанти підходять.' },
+      { prompt: 'так (для tá-питань)', answers: ['Tá'], hint: 'Коротка відповідь.' },
+      { prompt: 'ні (для tá-питань)', answers: ['Níl'], hint: 'Коротка відповідь.' },
+      { prompt: 'я можу', answers: ['Is féidir liom'], hint: 'Конструкція з “можу”.' },
+      { prompt: 'я хочу', answers: ['Ba mhaith liom'], hint: 'Частий вираз для “хочу / хотів би”.' },
+      { prompt: 'чай', answers: ['tae'], hint: 'Дуже коротке слово.' },
+      { prompt: 'я хочу чай', answers: ['Ba mhaith liom tae', 'Ba mhaith liom tae.'], hint: 'Склади фразу повністю.' },
+      { prompt: 'як ти?', answers: ['Conas tá tú?', 'Conas tá tú', 'Cén chaoi a bhfuil tú?', 'Cén chaoi a bhfuil tú'], hint: 'Приймаються два часті варіанти.' },
+      { prompt: 'я добре', answers: ['Tá mé go maith', 'Tá mé go maith.'], hint: 'Починається з “Tá mé...”.' },
+      { prompt: 'школа', answers: ['scoil'], hint: 'Коротке повсякденне слово.' },
+      { prompt: 'книга', answers: ['leabhar'], hint: 'Слово зі словника.' },
+      { prompt: 'будь ласка', answers: ['Tá fáilte romhat', 'Fáilte!'], hint: 'Можливі два варіанти.' }
+    ];
+
+    const state = {
+      activeTab: 'learn',
+      activeCategory: 'Усе',
+      learned: new Set(JSON.parse(localStorage.getItem('gaeilge-big-learned') || '[]')),
+      totalPoints: Number(localStorage.getItem('gaeilge-big-points') || 0),
+      quizBest: Number(localStorage.getItem('gaeilge-big-quiz-best') || 0),
+      builderBest: Number(localStorage.getItem('gaeilge-big-builder-best') || 0),
+      quizSession: null,
+      builderSession: null,
+      typingSession: null,
+    };
+
+    const tabs = document.querySelectorAll('.tab-button');
+    const panels = {
+      learn: document.getElementById('learn-panel'),
+      quiz: document.getElementById('quiz-panel'),
+      builder: document.getElementById('builder-panel'),
+      typing: document.getElementById('typing-panel'),
+      dictionary: document.getElementById('dictionary-panel')
+    };
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function normalize(text) {
+      return (text || '')
+        .toLowerCase()
+        .trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[?.!,;:]/g, '')
+        .replace(/\s+/g, ' ');
+    }
+
+    function saveProgress() {
+      localStorage.setItem('gaeilge-big-learned', JSON.stringify([...state.learned]));
+      localStorage.setItem('gaeilge-big-points', String(state.totalPoints));
+      localStorage.setItem('gaeilge-big-quiz-best', String(state.quizBest));
+      localStorage.setItem('gaeilge-big-builder-best', String(state.builderBest));
+    }
+
+    function updateStats() {
+      document.getElementById('stat-learned').textContent = state.learned.size;
+      document.getElementById('stat-quiz').textContent = state.quizBest;
+      document.getElementById('stat-builder').textContent = state.builderBest;
+      document.getElementById('stat-points').textContent = state.totalPoints;
+    }
+
+    function setActiveTab(tab) {
+      state.activeTab = tab;
+      tabs.forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+      Object.entries(panels).forEach(([key, panel]) => {
+        panel.classList.toggle('active', key === tab);
+      });
+    }
+
+    tabs.forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
+
+    function renderCategoryFilters() {
+      const wrap = document.getElementById('categoryFilters');
+      const categories = ['Усе', ...new Set(vocabulary.map(item => item.category))];
+      wrap.innerHTML = categories.map(category => `
+        <button class="filter-chip ${state.activeCategory === category ? 'active' : ''}" data-category="${category}">${category}</button>
+      `).join('');
+
+      wrap.querySelectorAll('.filter-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.activeCategory = btn.dataset.category;
+          renderCategoryFilters();
+          renderLearnCards();
+        });
+      });
+    }
+
+    function renderLearnCards() {
+      const grid = document.getElementById('learnGrid');
+      const items = state.activeCategory === 'Усе'
+        ? vocabulary
+        : vocabulary.filter(item => item.category === state.activeCategory);
+
+      grid.innerHTML = items.map(item => `
+        <article class="word-card ${state.learned.has(item.irish) ? 'revealed' : ''}" data-irish="${item.irish}">
+          <div class="word-front">
+            <span class="word-tag">${item.category}</span>
+            <div class="word-irish">${item.irish}</div>
+            <div class="word-meta">Натисни, щоб побачити переклад і вимову.</div>
+          </div>
+          <div class="word-hidden">
+            <span class="word-tag">${item.category}</span>
+            <div class="word-irish">${item.uk}</div>
+            <div class="word-meta"><strong>Irish:</strong> ${item.irish}<br><strong>Вимова:</strong> ${item.pron || '—'}</div>
+          </div>
+        </article>
+      `).join('');
+
+      grid.querySelectorAll('.word-card').forEach(card => {
+        card.addEventListener('click', () => {
+          card.classList.toggle('revealed');
+          state.learned.add(card.dataset.irish);
+          state.totalPoints += 1;
+          saveProgress();
+          updateStats();
+        });
+      });
+    }
+
+    function buildQuizSession() {
+      const base = shuffle(vocabulary).slice(0, 15);
+      const questions = base.map(item => {
+        const reverse = Math.random() < 0.45;
+        if (reverse) {
+          const distractors = shuffle(vocabulary.filter(v => v.irish !== item.irish)).slice(0, 3).map(v => v.irish);
+          return {
+            prompt: `Як буде ірландською: ${item.uk}?`,
+            answer: item.irish,
+            note: `Вимова: ${item.pron || '—'}`,
+            options: shuffle([item.irish, ...distractors])
+          };
+        }
+        const distractors = shuffle(vocabulary.filter(v => v.uk !== item.uk)).slice(0, 3).map(v => v.uk);
+        return {
+          prompt: `Що означає: ${item.irish}?`,
+          answer: item.uk,
+          note: `Вимова: ${item.pron || '—'}`,
+          options: shuffle([item.uk, ...distractors])
+        };
+      });
+      return { index: 0, score: 0, locked: false, questions };
+    }
+
+    function renderQuizQuestion() {
+      const session = state.quizSession;
+      const q = session.questions[session.index];
+      document.getElementById('quizProgress').textContent = `Питання ${session.index + 1} / ${session.questions.length}`;
+      document.getElementById('quizScore').textContent = `${session.score} балів`;
+      document.getElementById('quizPrompt').textContent = q.prompt;
+      document.getElementById('quizFeedback').textContent = q.note;
+      document.getElementById('nextQuizBtn').disabled = true;
+
+      const wrap = document.getElementById('quizOptions');
+      wrap.innerHTML = '';
+      q.options.forEach(option => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = option;
+        btn.addEventListener('click', () => handleQuizAnswer(option, btn));
+        wrap.appendChild(btn);
+      });
+    }
+
+    function handleQuizAnswer(option, button) {
+      const session = state.quizSession;
+      if (!session || session.locked) return;
+      session.locked = true;
+      const q = session.questions[session.index];
+      const buttons = [...document.querySelectorAll('.option-btn')];
+      buttons.forEach(btn => {
+        if (btn.textContent === q.answer) btn.classList.add('correct');
+        if (btn === button && option !== q.answer) btn.classList.add('wrong');
+        btn.disabled = true;
+      });
+
+      if (option === q.answer) {
+        session.score += 1;
+        state.totalPoints += 5;
+        document.getElementById('quizFeedback').textContent = 'Правильно!';
+      } else {
+        document.getElementById('quizFeedback').textContent = `Не зовсім. Правильна відповідь: ${q.answer}`;
+      }
+      document.getElementById('quizScore').textContent = `${session.score} балів`;
+      document.getElementById('nextQuizBtn').disabled = false;
+      saveProgress();
+      updateStats();
+    }
+
+    function startQuiz() {
+      state.quizSession = buildQuizSession();
+      document.getElementById('quizCard').classList.remove('hidden');
+      document.getElementById('quizEmptyState').classList.add('hidden');
+      document.getElementById('nextQuizBtn').textContent = 'Далі';
+      renderQuizQuestion();
+    }
+
+    function nextQuiz() {
+      if (!state.quizSession) return startQuiz();
+      const session = state.quizSession;
+      session.index += 1;
+      session.locked = false;
+      if (session.index >= session.questions.length) {
+        state.quizBest = Math.max(state.quizBest, session.score);
+        state.totalPoints += session.score * 2;
+        saveProgress();
+        updateStats();
+        document.getElementById('quizProgress').textContent = 'Тест завершено';
+        document.getElementById('quizScore').textContent = `${session.score} балів`;
+        document.getElementById('quizPrompt').textContent = `Готово! Результат: ${session.score} / ${session.questions.length}`;
+        document.getElementById('quizOptions').innerHTML = '';
+        document.getElementById('quizFeedback').textContent = 'Натисни знову, щоб отримати нову серію питань.';
+        document.getElementById('nextQuizBtn').textContent = 'Почати знову';
+        document.getElementById('nextQuizBtn').disabled = false;
+        state.quizSession = null;
+        return;
+      }
+      renderQuizQuestion();
+    }
+
+    document.getElementById('startQuizBtn').addEventListener('click', startQuiz);
+    document.getElementById('nextQuizBtn').addEventListener('click', nextQuiz);
+
+    function buildBuilderSession() {
+      return {
+        index: 0,
+        score: 0,
+        locked: false,
+        chosen: [],
+        challenges: shuffle(sentenceChallenges).slice(0, 12)
+      };
+    }
+
+    function renderBuilder() {
+      const session = state.builderSession;
+      const challenge = session.challenges[session.index];
+      const tokens = shuffle(challenge.sentence.split(' '));
+      document.getElementById('builderProgress').textContent = `Речення ${session.index + 1} / ${session.challenges.length}`;
+      document.getElementById('builderScore').textContent = `${session.score} балів`;
+      document.getElementById('builderHint').textContent = challenge.hint;
+      document.getElementById('builderFeedback').textContent = 'Склади фразу плитками.';
+      document.getElementById('nextBuilderBtn').disabled = true;
+      document.getElementById('builderAnswer').innerHTML = '';
+      document.getElementById('builderTokens').innerHTML = '';
+      session.chosen = [];
+      session.locked = false;
+
+      tokens.forEach((token, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'token';
+        btn.textContent = token;
+        btn.dataset.index = index;
+        btn.addEventListener('click', () => {
+          if (session.locked || btn.classList.contains('used')) return;
+          btn.classList.add('used');
+          session.chosen.push({ token, index });
+          renderBuilderAnswer();
+        });
+        document.getElementById('builderTokens').appendChild(btn);
+      });
+    }
+
+    function renderBuilderAnswer() {
+      const line = document.getElementById('builderAnswer');
+      line.innerHTML = '';
+      state.builderSession.chosen.forEach((entry, chosenIndex) => {
+        const btn = document.createElement('button');
+        btn.className = 'token';
+        btn.textContent = entry.token;
+        btn.addEventListener('click', () => {
+          if (state.builderSession.locked) return;
+          state.builderSession.chosen.splice(chosenIndex, 1);
+          const original = [...document.querySelectorAll('#builderTokens .token')].find(item => item.dataset.index === String(entry.index));
+          if (original) original.classList.remove('used');
+          renderBuilderAnswer();
+        });
+        line.appendChild(btn);
+      });
+    }
+
+    function startBuilder() {
+      state.builderSession = buildBuilderSession();
+      document.getElementById('builderCard').classList.remove('hidden');
+      document.getElementById('builderEmptyState').classList.add('hidden');
+      document.getElementById('nextBuilderBtn').textContent = 'Далі';
+      renderBuilder();
+    }
+
+    function clearBuilder() {
+      const session = state.builderSession;
+      if (!session || session.locked) return;
+      session.chosen = [];
+      document.querySelectorAll('#builderTokens .token').forEach(btn => btn.classList.remove('used'));
+      renderBuilderAnswer();
+    }
+
+    function checkBuilder() {
+      const session = state.builderSession;
+      if (!session || session.locked) return;
+      const challenge = session.challenges[session.index];
+      const attempt = session.chosen.map(x => x.token).join(' ');
+      session.locked = true;
+      if (normalize(attempt) === normalize(challenge.sentence)) {
+        session.score += 1;
+        state.totalPoints += 7;
+        document.getElementById('builderFeedback').textContent = 'Чудово!';
+      } else {
+        document.getElementById('builderFeedback').textContent = `Поки ні. Правильний варіант: ${challenge.sentence}`;
+      }
+      document.getElementById('builderScore').textContent = `${session.score} балів`;
+      document.getElementById('nextBuilderBtn').disabled = false;
+      saveProgress();
+      updateStats();
+    }
+
+    function nextBuilder() {
+      if (!state.builderSession) return startBuilder();
+      const session = state.builderSession;
+      session.index += 1;
+      if (session.index >= session.challenges.length) {
+        state.builderBest = Math.max(state.builderBest, session.score);
+        state.totalPoints += session.score * 2;
+        saveProgress();
+        updateStats();
+        document.getElementById('builderProgress').textContent = 'Тренування завершено';
+        document.getElementById('builderScore').textContent = `${session.score} балів`;
+        document.getElementById('builderPrompt').textContent = `Готово! Результат: ${session.score} / ${session.challenges.length}`;
+        document.getElementById('builderHint').textContent = 'Натисни ще раз, щоб отримати нову серію.';
+        document.getElementById('builderAnswer').innerHTML = '';
+        document.getElementById('builderTokens').innerHTML = '';
+        document.getElementById('builderFeedback').textContent = 'Ти вже добре тренуєш порядок слів.';
+        document.getElementById('nextBuilderBtn').textContent = 'Почати знову';
+        document.getElementById('nextBuilderBtn').disabled = false;
+        state.builderSession = null;
+        return;
+      }
+      renderBuilder();
+    }
+
+    document.getElementById('startBuilderBtn').addEventListener('click', startBuilder);
+    document.getElementById('clearBuilderBtn').addEventListener('click', clearBuilder);
+    document.getElementById('checkBuilderBtn').addEventListener('click', checkBuilder);
+    document.getElementById('nextBuilderBtn').addEventListener('click', nextBuilder);
+
+    function buildTypingSession() {
+      return {
+        index: 0,
+        score: 0,
+        locked: false,
+        challenges: shuffle(typingChallenges).slice(0, 10)
+      };
+    }
+
+    function renderTyping() {
+      const session = state.typingSession;
+      const challenge = session.challenges[session.index];
+      document.getElementById('typingProgress').textContent = `Завдання ${session.index + 1} / ${session.challenges.length}`;
+      document.getElementById('typingScore').textContent = `${session.score} балів`;
+      document.getElementById('typingPrompt').textContent = `Переклади на ірландську: ${challenge.prompt}`;
+      document.getElementById('typingHint').textContent = challenge.hint;
+      document.getElementById('typingInput').value = '';
+      document.getElementById('typingInput').focus();
+      document.getElementById('typingFeedback').textContent = 'Напиши відповідь і натисни “Перевірити”.';
+      document.getElementById('nextTypingBtn').disabled = true;
+      session.locked = false;
+    }
+
+    function startTyping() {
+      state.typingSession = buildTypingSession();
+      document.getElementById('typingCard').classList.remove('hidden');
+      document.getElementById('typingEmptyState').classList.add('hidden');
+      document.getElementById('nextTypingBtn').textContent = 'Далі';
+      renderTyping();
+    }
+
+    function checkTyping() {
+      const session = state.typingSession;
+      if (!session || session.locked) return;
+      const challenge = session.challenges[session.index];
+      const value = document.getElementById('typingInput').value;
+      const ok = challenge.answers.some(answer => normalize(answer) === normalize(value));
+      session.locked = true;
+      if (ok) {
+        session.score += 1;
+        state.totalPoints += 8;
+        document.getElementById('typingFeedback').textContent = 'Правильно!';
+      } else {
+        document.getElementById('typingFeedback').textContent = `Правильна відповідь: ${challenge.answers[0]}`;
+      }
+      document.getElementById('typingScore').textContent = `${session.score} балів`;
+      document.getElementById('nextTypingBtn').disabled = false;
+      saveProgress();
+      updateStats();
+    }
+
+    function nextTyping() {
+      if (!state.typingSession) return startTyping();
+      const session = state.typingSession;
+      session.index += 1;
+      if (session.index >= session.challenges.length) {
+        state.totalPoints += session.score * 2;
+        saveProgress();
+        updateStats();
+        document.getElementById('typingProgress').textContent = 'Друк завершено';
+        document.getElementById('typingScore').textContent = `${session.score} балів`;
+        document.getElementById('typingPrompt').textContent = `Готово! Результат: ${session.score} / ${session.challenges.length}`;
+        document.getElementById('typingHint').textContent = 'Натисни ще раз, щоб отримати нові завдання.';
+        document.getElementById('typingInput').value = '';
+        document.getElementById('typingFeedback').textContent = 'Можна проходити заново.';
+        document.getElementById('nextTypingBtn').textContent = 'Почати знову';
+        document.getElementById('nextTypingBtn').disabled = false;
+        state.typingSession = null;
+        return;
+      }
+      renderTyping();
+    }
+
+    document.getElementById('startTypingBtn').addEventListener('click', startTyping);
+    document.getElementById('checkTypingBtn').addEventListener('click', checkTyping);
+    document.getElementById('nextTypingBtn').addEventListener('click', nextTyping);
+    document.getElementById('typingInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        if (document.getElementById('nextTypingBtn').disabled) checkTyping();
+        else nextTyping();
+      }
+    });
+
+    function renderDictionary(filter = '') {
+      const q = normalize(filter);
+      const items = vocabulary.filter(item => {
+        const hay = `${item.irish} ${item.uk} ${item.pron || ''} ${item.category}`;
+        return normalize(hay).includes(q);
+      });
+
+      const list = document.getElementById('dictionaryList');
+      list.innerHTML = items.map(item => `
+        <article class="dictionary-row">
+          <div><strong>${item.irish}</strong><span>${item.category}</span></div>
+          <div><strong>Переклад</strong><span>${item.uk}</span></div>
+          <div><strong>Вимова</strong><span>${item.pron || '—'}</span></div>
+          <div><strong>Тема</strong><span>${item.category}</span></div>
+        </article>
+      `).join('');
+    }
+
+    document.getElementById('dictionarySearch').addEventListener('input', e => renderDictionary(e.target.value));
+
+    renderCategoryFilters();
+    renderLearnCards();
+    renderDictionary();
+    updateStats();
+    setActiveTab('learn');
+  </script>
 </body>
 </html>
